@@ -1,18 +1,17 @@
-FROM       node:14-alpine
+FROM node:14-alpine AS builder
 
-WORKDIR    /usr/your-project-name
+ADD . /app
+WORKDIR /app
+RUN npm install && npm run build
 
-# Copy and install production packages
-COPY       build build/
-COPY       package*.json ./
-COPY       production.env ./
-RUN        npm ci --production
+FROM node:14-alpine
+ENV NODE_ENV="production"
+RUN npm install -g nodemon && \
+  addgroup nonroot --gid 1100 && \
+  adduser nonroot --ingroup nonroot --uid 1100 --home /home/nonroot --disabled-password
 
-# Non root user
-USER       node
+COPY --from=builder /app/build /app
 
-ENV        NODE_ENV="production"
-EXPOSE     8080 
-# Running port is configured through API_PORT env variable
-ENTRYPOINT ["npm"]
-CMD        ["start"]
+USER 1100:1100
+EXPOSE 8080
+ENTRYPOINT [ "node", "build", "8080", "/app" ]
