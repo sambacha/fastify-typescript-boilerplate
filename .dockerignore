@@ -1,0 +1,15 @@
+.git
+.github/
+Dockerfile
+docker-compose.yml
+node_modules
+
+# misc
+.DS_Store
+.env*
+
+# debug
+npm-debug.log*
+
+.nyc_output
+coverage
